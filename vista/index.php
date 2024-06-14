@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MVC API DATACRM - Prueba Tecnica</title>
+    <title>MVC API DATACRM - Prueba Técnica</title>
     <!-- Hoja de estilos -->
     <link rel="stylesheet" href="../css/style.css">
-    <!--    CSS de los iconos-->
+    <!-- CSS de los iconos -->
     <link rel="stylesheet" href="https://www.datacrm.com/css/fontawesome620.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <!-- Icono -->
     <link rel="icon" href="https://www.datacrm.com/front/images/favicon.ico">
@@ -63,7 +63,7 @@
                 <div class="row d-none d-lg-block">
                     <div class="col-lg-10 pr-0 d-lg-block" style="float: right;">
                         <!-- Botón que contiene la instrucción en el id mostrarDatos para mostrar la información en la tabla -->
-                        <button class="modalPruebaGratis3 btn2 btn-orange mt-3 f-sz-m my-3 p-2 px-4 typ-montserrat effect-zoom p-2 btn myBtnBlue typ-montserrat px-4 f-sz-m mt-3 effect-zoom p-2"
+                        <button class="modalActualizar btn2 btn-orange mt-3 f-sz-m my-3 p-2 px-4 typ-montserrat effect-zoom p-2 btn myBtnBlue typ-montserrat px-4 f-sz-m mt-3 effect-zoom p-2"
                                 id="mostrarDatos">
                             <b class="">Consultar API <i class="fa-solid fa-terminal"></i></b>
                         </button>
@@ -85,31 +85,196 @@
 
     <br>
 
-    <div id="datos">
-        <!-- Aquí se visualizarán los datos del API en una tabla -->
+    <div id="datoscontacto">
+        <!-- Aquí se visualizarán los datos de los contactos desde el API -->
     </div>
+
+    <!-- Aquí se visualizarán los datos de los negocios desde el API -->
+    <div id="negocios"></div>
+
+    <br><br>
+<!--   modal para actualizar -->
+
+      <div id="modalActualizar" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Actualizar Contacto <span id="contactId"></span></h2>
+            <form id="formActualizar">
+                <div class="form-group">
+                    <label for="lastname">Apellidos:</label>
+                    <input type="text" id="lastname" class=" form-control typ-os-regular txt-greenblue-strong mt-3 form-radius" name="lastname" required>
+                </div>
+                <div class="form-group">
+                    <label for="assigned_user_id">ID Usuario Asignado:</label>
+                    <input type="text" id="assigned_user_id" class=" form-control typ-os-regular txt-greenblue-strong mt-3 form-radius" name="assigned_user_id" required>
+                </div>
+                <input type="hidden" id="contact_id" name="id" value="">
+                <button type="submit" class="btn btn-primary">Actualizar</button>
+            </form>
+        </div>
+    </div>
+
+    <!--   FIN modal para actualizar -->
 
     <script>
         document.getElementById('mostrarDatos').addEventListener('click', function () {
-            fetch('../controlador/DataCRM.php') // Consultar el API desde el controlador
-                .then(response => response.json()) // Recibir la respuesta en JSON
-                .then(data => { // Pintar la tabla de acuerdo a los datos
-                    let table = '<div class="col-md-12 col-12 text-center"> <h2 class="text-uppercase mt-4 txt-blue typ-montserrat ft-h2 myTitleBlue">MIS CONTACTOS</h2> <hr class="hr-silver30"><br> </div><table class="container p-1">';
-                    table += '<tr class="botonOutline txt-black changePlan myButton2 myButtonL"><th class="text-center botonOutline txt-black changePlan effect-zoom myButton2 myButtonL">ID</th><th class="text-center botonOutline txt-black changePlan effect-zoom myButton2 myButtonL">N° Contacto</th><th class="text-center botonOutline txt-black changePlan effect-zoom myButton2 myButtonL">Apellido</th><th class="text-center botonOutline txt-black changePlan effect-zoom myButton2 myButtonL">Fecha y hora de creación</th></tr>';
-                    data.forEach(contact => {
-                        table += `<tr><td class="myButton2 text-center">${contact.id}</td class="myButton2 text-center"><td class="myButton2 text-center">${contact.contact_no}</td class="myButton2 text-center"><td class="myButton2 text-center">${contact.lastname}</td class="myButton2 text-center"><td class="myButton2 text-center">${contact.createdtime}</td class="myButton2 text-center"></tr>`;
-                    });
-                    table += '</table></br>';
-                    document.getElementById('datos').innerHTML = table; // Muestra la tabla con los datos en el Div
-                    // Scroll hacia abajo automáticamente para ver la tabla cargada
-                    window.scrollBy({
-                        top: document.getElementById('datos').offsetTop - window.scrollY,
-                        behavior: 'smooth'
-                    });
+            // Cargar datos de contactos
+            fetch('../controlador/DataCRM.php')
+                .then(response => response.json())
+                .then(responseData => {
+                    let data = responseData.data;
+
+                    if (Array.isArray(data)) {
+                        let table = '<div class="col-md-12 col-12 text-center"> <h2 class="text-uppercase mt-4 txt-blue typ-montserrat ft-h2 myTitleBlue">MIS CONTACTOS</h2> <hr class="hr-silver30"><br> </div><table class="container p-1">';
+                        table += '<tr class="botonOutline txt-black changePlan myButton2 myButtonL"><th class="text-center botonOutline txt-black changePlan effect-zoom myButton2 myButtonL">ID</th><th class="text-center botonOutline txt-black changePlan effect-zoom myButton2 myButtonL">N° Contacto</th><th class="text-center botonOutline txt-black changePlan effect-zoom myButton2 myButtonL">Apellido</th><th class="text-center botonOutline txt-black changePlan effect-zoom myButton2 myButtonL">Fecha/hora de creación</th><th class="text-center botonOutline txt-black changePlan effect-zoom myButton2 myButtonL">Fecha/hora de actualización</th><th class="text-center botonOutline txt-black changePlan effect-zoom myButton2 myButtonL">Acciones</th></tr>';
+                        data.forEach(contact => {
+                            table += `<tr><td class="myButton2 text-center">${contact.id}</td><td class="myButton2 text-center">${contact.contact_no}</td><td class="myButton2 text-center">${contact.lastname}</td><td class="myButton2 text-center">${contact.createdtime}</td><td class="myButton2 text-center">${contact.modifiedtime}</td><td class="myButton2 text-center"><button style="font-size: 14px;" class="modalActualizar btn-orange f-sz-m typ-montserrat effect-zoom btn myBtnBlue typ-montserrat f-sz-m effect-zoom p-2 actualizar-btn" data-id="${contact.id}">Actualizar</button></td></tr>`;
+                        });
+                        table += '</table></br>';
+                        document.getElementById('datoscontacto').innerHTML = table;
+
+                        // Scroll hacia abajo automáticamente
+                        window.scrollBy({
+                            top: document.getElementById('datoscontacto').offsetTop - window.scrollY,
+                            behavior: 'smooth'
+                        });
+
+                        // Configuración de los botones de actualización
+                        document.querySelectorAll('.actualizar-btn').forEach(button => {
+                            button.addEventListener('click', function () {
+                                let id = this.getAttribute('data-id');
+                                let modal = document.getElementById('modalActualizar');
+                                let form = document.getElementById('formActualizar');
+
+                                // Mostrar el modal
+                                modal.style.display = 'block';
+
+                                // Obtener datos del contacto correspondiente desde el nuevo endpoint
+                                fetch(`https://develop1.datacrm.la/jdimate/pruebatecnica/webservice.php?operation=retrieve&sessionName=49fba335666b91b0a62ec&id=${id}`)
+                                    .then(response => {
+                                        if (!response.ok) {
+                                            throw new Error('Error al cargar los datos del servidor.');
+                                        }
+                                        return response.json();
+                                    })
+                                    .then(data => {
+                                        console.log('Datos del contacto:', data);
+                                        let contact = data.result;
+                                        form.querySelector('#lastname').value = contact.lastname || '';
+                                        form.querySelector('#assigned_user_id').value = contact.assigned_user_id || '';
+                                        form.querySelector('#contact_id').value = id;
+                                    })
+                                    .catch(error => {
+                                        console.error('Error al obtener los datos del contacto desde el API:', error);
+                                    });
+
+                                // Cerrar el modal al hacer clic en la "X" y afuera
+                                let spanClose = modal.querySelector('.close');
+                                spanClose.addEventListener('click', function () {
+                                    modal.style.display = 'none';
+                                });
+
+                                window.addEventListener('click', function (event) {
+                                    if (event.target === modal) {
+                                        modal.style.display = 'none';
+                                    }
+                                });
+
+                                form.addEventListener('submit', function (event) {
+                                    event.preventDefault(); // Evitar el envío del formulario
+                                    actualizarContacto();
+                                });
+                            });
+                        });
+
+                        // Función para enviar la actualización del contacto
+                        function actualizarContacto() {
+                            let form = document.getElementById('formActualizar');
+                            let lastname = form.querySelector('#lastname').value;
+                            let assigned_user_id = form.querySelector('#assigned_user_id').value;
+                            let contact_id = form.querySelector('#contact_id').value;
+
+                            // Datos a enviar
+                            let element = {
+                                'lastname': lastname,
+                                'assigned_user_id': assigned_user_id,
+                                'id': contact_id
+                            };
+
+                            // Enviar solicitud POST para actualizar
+                            fetch(`https://develop1.datacrm.la/jdimate/pruebatecnica/webservice.php?operation=update&sessionName=49fba335666b91b0a62ec`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                },
+                                body: new URLSearchParams({
+                                    'element': JSON.stringify(element)
+                                })
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        alert('Registro actualizado correctamente');
+                                        let modal = document.getElementById('modalActualizar');
+                                        modal.style.display = 'none'; // Cerrar modal después de éxito
+                                    } else {
+                                        console.error('Error al actualizar el contacto:', data.message);
+                                        alert('Error al actualizar el contacto. Por favor, inténtalo nuevamente.');
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error al actualizar el contacto:', error);
+                                    alert('Error al actualizar el contacto. Por favor, inténtalo nuevamente.');
+                                });
+                        }
+                    }
                 })
-                .catch(error => console.error('Error:', error)); // Si ocurre algún error en el API, mostrarlo en la consola
-        });
+                .catch(error => console.error('Error fetching data:', error));
+
+            // Endpoint URL PARA NEGOCIOS
+            const endpoint = 'https://develop1.datacrm.la/jdimate/pruebatecnica/webservice.php?operation=describe&sessionName=49fba335666b91b0a62ec&elementType=Potentials';
+
+            // Fetch para obtener los datos del endpoint
+            fetch(endpoint)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al cargar los datos del servidor.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Datos de NEGOCIOS:', data.result);
+
+                    // Obtener los datos de name y idPrefix
+                    const name = data.result.name;
+                    const idPrefix = data.result.idPrefix;
+
+                    // Construir el HTML para mostrar los datos
+                    let table = `<div class="col-md-12 col-12 text-center"> <h2 class="text-uppercase mt-4 txt-blue typ-montserrat ft-h2 myTitleBlue">MIS NEGOCIOS</h2> <hr class="hr-silver30"><br> </div>
+                        <div class="container p-1">
+                            <table class="container">
+                                <tr class="botonOutline txt-black changePlan">
+                                    <th class="text-center botonOutline txt-black changePlan effect-zoom myButton2 myButtonL">ID</th>
+                                    <th class="text-center botonOutline txt-black changePlan effect-zoom myButton2 myButtonL">Nombre Negocio</th>
+                                </tr>
+                                <tr>
+                                    <td class="myButton2 text-center">${idPrefix}</td>
+                                    <td class="myButton2 text-center">${name}</td>
+                                </tr>
+                            </table>
+                        </div>`;
+
+                    // Insertar los datos en el div con id "negocios"
+                    document.getElementById('negocios').innerHTML = table;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });  //fin clic en el boton de mostrar
+
     </script>
+
 </div>
 </body>
 </html>
+
